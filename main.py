@@ -1,15 +1,18 @@
 import os
+from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
 from scripts.config import CARDS_CONFIG
 from scripts.extractor import fetch_metabase_card
 from scripts.processor import processar_dados_consolidados
 from scripts.loader import exportar_para_sheets, escrever_log_dashboard
-from datetime import datetime, timedelta, timezone
 
 load_dotenv()
 
 def main():
-    start_time = datetime.now()
+    # Já declaro o fuso horário aqui em cima pra usar no código todo
+    fuso_sp = timezone(timedelta(hours=-3))
+    start_time = datetime.now(fuso_sp)
+    
     print(f"🚀 [START] Iniciando pipeline: {start_time.strftime('%H:%M:%S')}")
 
     # Configurações do Google extraídas do .env
@@ -29,6 +32,14 @@ def main():
         print("❌ ERRO: Nenhum dado extraído dos cards.")
         return
 
+    # ==========================================
+    # 🚨 DEBUG ETAPA 1: O QUE CHEGOU DO METABASE?
+    # ==========================================
+    print(f"\n📦 DEBUG: Total de DataFrames extraídos: {len(dfs_extraidos)}")
+    for i, df in enumerate(dfs_extraidos):
+        print(f"   -> DF {i} | Colunas ({len(df.columns)}): {list(df.columns)}")
+    print("\n")
+
     # --- ETAPA 2: TRANSFORMAÇÃO ---
     print("⚙️  Processando e unificando dados...")
     df_final = processar_dados_consolidados(dfs_extraidos)
@@ -36,6 +47,11 @@ def main():
     # Ordenação das colunas
     cols = ['IES'] + sorted([c for c in df_final.columns if c != 'IES'])
     df_final = df_final[cols]
+
+    # ==========================================
+    # 🚨 DEBUG ETAPA 2: O QUE O PROCESSADOR CUSPIU?
+    # ==========================================
+    print(f"\n📊 DEBUG FINAL: Total de Colunas prontas para o Sheets ({len(df_final.columns)}): {list(df_final.columns)}\n")
 
     # --- ETAPA 3: CARGA LOCAL (Backup) ---
     df_final.to_excel("relatorio_final_bi.xlsx", index=False)
@@ -46,7 +62,6 @@ def main():
         # 1. Envia os dados para a aba de input
         exportar_para_sheets(df_final, SPREADSHEET_ID, JSON_CREDS)
         
-        fuso_sp = timezone(timedelta(hours=-3))
         agora = datetime.now(fuso_sp).strftime('%d/%m/%Y %H:%M:%S')
         mensagem_log = f"Última atualização: {agora}"
         
@@ -54,13 +69,13 @@ def main():
             spreadsheet_id=SPREADSHEET_ID,
             json_path=JSON_CREDS,
             aba_nome="Métricas Novas",  
-            celula="P20:Q20",
+            celula="P20", # Deixei P20 pra evitar erro do gspread com células mescladas
             texto=mensagem_log
         )
     else:
         print("⚠️  PULO: GOOGLE_SHEETS_ID não configurado ou credenciais.json ausente.")
 
-    end_time = datetime.now()
+    end_time = datetime.now(fuso_sp)
     print(f"🏁 [FINISH] Tempo total: {end_time - start_time}")
 
 if __name__ == "__main__":
