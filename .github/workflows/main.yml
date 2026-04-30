@@ -18,7 +18,7 @@ jobs:
       - name: Configurar Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: '3.11' # Atualizado para a versão estável mais recente
 
       - name: Instalar dependencias
         run: |
@@ -26,8 +26,10 @@ jobs:
           pip install -r requirements.txt
 
       - name: Criar credenciais.json
-        # Esse passo transforma o seu Secret do GitHub no arquivo que o gspread precisa
-        run: echo "${{ secrets.GOOGLE_CREDS_JSON }}" > credenciais.json
+        # Usar 'env' aqui evita que o shell do Linux remova as aspas do seu JSON
+        env:
+          GOOGLE_JSON: ${{ secrets.GOOGLE_CREDS_JSON }}
+        run: echo "$GOOGLE_JSON" > credenciais.json
 
       - name: Rodar Pipeline
         env:
