@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from scripts.config import CARDS_CONFIG
 from scripts.extractor import fetch_metabase_card
 from scripts.processor import processar_dados_consolidados
-from scripts.loader import exportar_para_sheets  # <-- Liberado!
+from scripts.loader import exportar_para_sheets, escrever_log_dashboard # <-- Import atualizado
 
 load_dotenv()
 
@@ -33,7 +33,7 @@ def main():
     print("⚙️  Processando e unificando dados...")
     df_final = processar_dados_consolidados(dfs_extraidos)
 
-    # Ordenação: IES primeiro, o resto em ordem alfabética para facilitar o CORRESP do Sheets
+    # Ordenação das colunas
     cols = ['IES'] + sorted([c for c in df_final.columns if c != 'IES'])
     df_final = df_final[cols]
 
@@ -41,9 +41,23 @@ def main():
     df_final.to_excel("relatorio_final_bi.xlsx", index=False)
     print("💾 Backup local 'relatorio_final_bi.xlsx' gerado.")
 
-    # --- ETAPA 4: CARGA NUVEM (Google Sheets) ---
+    # --- ETAPA 4: CARGA NUVEM E LOG ---
     if SPREADSHEET_ID and os.path.exists(JSON_CREDS):
+        # 1. Envia os dados para a aba de input
         exportar_para_sheets(df_final, SPREADSHEET_ID, JSON_CREDS)
+        
+        # 2. Prepara e envia o log para o Dashboard
+        agora = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+        mensagem_log = f"Última atualização: {agora}"
+        
+        # AJUSTE OS NOMES ABAIXO SE PRECISAR
+        escrever_log_dashboard(
+            spreadsheet_id=SPREADSHEET_ID,
+            json_path=JSON_CREDS,
+            aba_nome="Métricas Novas",  
+            celula="P20:Q20",
+            texto=mensagem_log
+        )
     else:
         print("⚠️  PULO: GOOGLE_SHEETS_ID não configurado ou credenciais.json ausente.")
 
@@ -52,5 +66,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-    #teste

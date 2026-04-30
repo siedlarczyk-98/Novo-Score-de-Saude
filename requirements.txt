@@ -3,3 +3,5 @@ pandas
 numpy
 python-dotenv
 openpyxl
+gspread
+oauth2client
