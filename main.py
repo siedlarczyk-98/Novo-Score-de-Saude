@@ -1,10 +1,10 @@
 import os
-from datetime import datetime
 from dotenv import load_dotenv
 from scripts.config import CARDS_CONFIG
 from scripts.extractor import fetch_metabase_card
 from scripts.processor import processar_dados_consolidados
-from scripts.loader import exportar_para_sheets, escrever_log_dashboard # <-- Import atualizado
+from scripts.loader import exportar_para_sheets, escrever_log_dashboard
+from datetime import datetime, timedelta, timezone
 
 load_dotenv()
 
@@ -46,11 +46,10 @@ def main():
         # 1. Envia os dados para a aba de input
         exportar_para_sheets(df_final, SPREADSHEET_ID, JSON_CREDS)
         
-        # 2. Prepara e envia o log para o Dashboard
-        agora = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+        fuso_sp = timezone(timedelta(hours=-3))
+        agora = datetime.now(fuso_sp).strftime('%d/%m/%Y %H:%M:%S')
         mensagem_log = f"Última atualização: {agora}"
         
-        # AJUSTE OS NOMES ABAIXO SE PRECISAR
         escrever_log_dashboard(
             spreadsheet_id=SPREADSHEET_ID,
             json_path=JSON_CREDS,
