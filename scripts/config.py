@@ -21,7 +21,9 @@ CARDS_CONFIG = {
     1582: "Satisfacao",             # Com Perfil
     1590: "Satisfacao Geral",       
     1583: "Satisfacao 30d",         # Com Perfil
-    1591: "Satisfacao Geral 30d"   
+    1591: "Satisfacao Geral 30d",
+    1614: "Licenças Professores Contratadas",
+    1615: "Licenças Alunos Contratadas"
 }
 
 AGG_RULES = {
@@ -38,7 +40,9 @@ AGG_RULES = {
     "Satisfacao": "mean",
     "Satisfacao Geral": "mean",
     "Satisfacao 30d": "mean",
-    "Satisfacao Geral 30d": "mean"
+    "Satisfacao Geral 30d": "mean",
+    "Licenças Professores Contratadas": "sum",
+    "Licenças Alunos Contratadas": "sum" # <- Corrigido: Removida a linha duplicada que estava por baixo
 }
 
 IES_CLEAN_MAP = {
@@ -52,7 +56,6 @@ FINAL_COLUMNS = [
     "Ativos e Inativos", "Ativos e Inativos 30d",
     "Casos e Repeticao", "Casos e Repeticao 30d",
     "Retencao Geral", "Retencao 30d",
-    "Satisfacao Geral", "Satisfacao 30d"
+    "Satisfacao Geral", "Satisfacao 30d",
+    "Licenças Professores Contratadas", "Licenças Alunos Contratadas"
 ]
-
-#force

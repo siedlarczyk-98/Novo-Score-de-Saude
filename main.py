@@ -69,7 +69,7 @@ def main():
             spreadsheet_id=SPREADSHEET_ID,
             json_path=JSON_CREDS,
             aba_nome="Métricas Novas",  
-            celula="P20", # Deixei P20 pra evitar erro do gspread com células mescladas
+            celula="P20",
             texto=mensagem_log
         )
     else:
