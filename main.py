@@ -69,7 +69,7 @@ def main():
             spreadsheet_id=SPREADSHEET_ID,
             json_path=JSON_CREDS,
             aba_nome="Métricas Novas",  
-            celula="P20",
+            celula="Q20",
             texto=mensagem_log
         )
     else:
